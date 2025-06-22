@@ -1,0 +1,17 @@
+# Mamba 示例所需依赖
+# 注意：PyTorch 通过 micromamba 在 install_deps.sh 中安装，不在此文件中列出
+# 请运行 bash install_deps.sh 来正确安装所有依赖
+
+# 核心依赖 (通过 pip 安装)
+numpy
+einops
+transformers
+
+# Mamba 相关依赖 (需要先安装 PyTorch)
+causal-conv1d
+mamba-ssm
+
+# 可选依赖 (用于更好的体验)
+jupyter
+matplotlib
+tqdm 
