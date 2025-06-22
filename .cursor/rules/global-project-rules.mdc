@@ -1,0 +1,87 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 项目全局规则
+
+## 规则管理
+- **重要**: 这是本项目的全局规则文件
+- 所有对项目内全局规则的修改都必须在此文件中进行
+- 不得创建其他全局规则文件，所有项目级别的规则都应在此文件中维护
+- 此规则在每次对话中都会被加载和应用
+
+## 开发和测试环境要求
+
+### 测试环境
+- **必要要求**: 所有代码修改和功能测试都必须在 micromamba 的 llm 环境中进行
+- **Shell 要求**: 测试时必须使用 bash 作为 shell，不得使用其他 shell（如 zsh）
+- 在运行任何测试之前，必须先执行：`micromamba activate llm`
+- 确保所有依赖包和环境配置都在 llm 环境中正确安装
+- 不得在其他 conda/mamba 环境中进行测试，以保证环境一致性
+
+### 项目文件参考
+- 主要依赖文件：[requirements.txt](mdc:requirements.txt)
+- Mamba 使用说明：[README_mamba.md](mdc:README_mamba.md)
+- 简单示例：[simple_mamba_example.py](mdc:simple_mamba_example.py)
+- 完整示例：[mamba_example.py](mdc:mamba_example.py)
+
+## 安装配置要求
+
+### 依赖安装规则
+- **必要要求**: 所有与项目依赖安装相关的配置修改都必须在 [install_deps.sh](mdc:install_deps.sh) 文件中进行
+- **包管理器严格要求**: 
+  - **脚本内允许的安装命令**: 在 [install_deps.sh](mdc:install_deps.sh) 脚本内允许使用：
+    - `uv pip install`（首选方式）
+    - `micromamba install`（用于系统级依赖）
+    - `pip install`（仅在 `uv pip install` 由于 uv 自身问题失败时的备用方案）
+  - **绝对禁止**: 任何形式的直接命令行安装，包括但不限于：
+    - `pip install` 
+    - `pip3 install`
+    - `python -m pip install`
+    - `python3 -m pip install`
+    - `uv pip install`（直接在命令行使用）
+    - `micromamba install`（直接在命令行使用）
+    - 任何其他变体的安装命令
+- **严格禁止直接安装**: 在任何情况下都不允许直接运行以下命令：
+  - 上述所有形式的 `pip install` 命令
+  - `uv pip install`（直接在命令行使用）
+  - `micromamba install`（直接在命令行使用）
+  - `conda install` 
+  - `mamba install`
+  - 任何其他直接安装包的命令
+- **唯一安装方式**: 所有包的安装必须且只能通过运行 [install_deps.sh](mdc:install_deps.sh) 脚本来完成
+- **脚本内安装原则**: 在 [install_deps.sh](mdc:install_deps.sh) 脚本内使用安装命令时应遵循：
+  - **强制要求**: 所有 Python 包安装必须使用 `uv pip install`，严禁使用 `pip install`
+  - **micromamba install 使用场景**: 仅用于系统级依赖或无法通过 pip 安装的包
+  - **micromamba install 性能优化要求**: 
+    - **强制要求**: 所有 `micromamba install` 命令必须先检查包是否已安装，避免重复安装
+    - **检查方式**: 使用 `micromamba list | grep -q "包名"` 或类似方式检查包存在性
+    - **安装模式**: 仅在包不存在时才执行安装：`micromamba list | grep -q "包名" || micromamba install -y 包名`
+    - **性能原因**: micromamba 安装速度较慢，必须避免不必要的重复安装操作
+  - **pip install 例外条件**: 仅在以下特殊情况下才允许使用 `pip install`：
+    - `uv pip install` 由于 uv 工具自身的问题（非包依赖问题）失败时
+    - 必须在代码中明确注释说明使用 `pip install` 的具体原因
+  - **绝对禁止**: 在 [install_deps.sh](mdc:install_deps.sh) 中直接使用 `pip install` 而不经过 `uv pip install` 尝试
+- **禁止行为**: 不得在其他文件中添加或修改安装配置，包括但不限于：
+  - 直接修改 requirements.txt 而不更新 install_deps.sh
+  - 在其他脚本文件中添加安装命令
+  - 绕过 install_deps.sh 直接安装依赖
+  - 在命令行中直接执行任何包安装命令
+
+### 安装验证流程
+- **验证方式**: 所有安装配置的修改都必须通过运行 [mamba_example.py](mdc:mamba_example.py) 来验证
+- **验证环境**: 验证必须在 micromamba 的 llm 环境中进行
+- **验证步骤**:
+  1. 修改 [install_deps.sh](mdc:install_deps.sh) 中的配置
+  2. 运行修改后的安装脚本
+  3. 切换到 bash shell 并激活 llm 环境
+  4. 运行 [mamba_example.py](mdc:mamba_example.py) 进行功能验证
+  5. 确认所有功能正常运行
+
+## 开发流程
+1. 切换到 bash shell：`bash`
+2. 激活测试环境：`micromamba activate llm`
+3. 进行代码修改
+4. 在 llm 环境中进行测试验证
+5. 确认功能正常后提交更改
